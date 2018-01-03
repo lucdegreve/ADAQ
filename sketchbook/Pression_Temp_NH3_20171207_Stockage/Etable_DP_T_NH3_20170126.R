@@ -1,0 +1,114 @@
+# Acquisision données systeme mesure NH3 Etable, pression et temperature
+#
+# Reset environment
+#
+rm(list = ls())         # Remove environemnent variables
+graphics.off()          # Close any open graphics
+
+#
+setwd("C:/Users/m.mathot/Desktop/BBLIM_1617/NH3/Etable/R")
+#
+
+num<-as.numeric(format(Sys.time(),"%Y%m%d%H%M"))[1]# Nom du ficher: un chiffre sous le format anneemoisjourheureminute , deux caracteres a chaque fois. Example pour 9 : 09
+
+NomFich<-paste(num,c("_E.txt"),sep=c(""))# Ici
+
+# Libraries
+#
+library(serial)
+library(stringr)
+library(ggplot2)
+library(chron)
+#
+# Script
+#acquisition
+
+con <- serialConnection(name = "test_con",
+                        port = "COM3",
+                        mode = "9800,n,8,1",
+                        buffering = "none",
+                        newline = 1,
+                        translation = "cr")
+
+open(con)
+Sys.timezone(location = TRUE)
+starTime<-Sys.time()
+stopTime <- starTime + 60*60*26 # en secondes
+foo <- ""
+test<-""
+textSize <- 0
+figure<-c("oui") # non, si oui, imprime les graphes
+
+Couleur<-rbind(Ambiant=c("black"),Temoin=c("grey"),Poste1=c("blue"),Poste2=c("red"),Poste3=c("green"),Poste4=c("orange"))
+TailLeg<-1.5
+
+
+#Configuration figure
+
+GraphMat<-matrix(1:2,2,1) #Définition de la division de la figure
+layout(GraphMat,widths=c(1,1),heights=c(2,2))
+par(mar=c(3,5,1.4,1.5),adj=(0.5),lwd=1, oma=c(0,3,0,0),cex=0.6)# définition des marges (,bty=c("d"))
+
+#Boucle de mesure
+
+while(Sys.time() < stopTime){
+  newText <- read.serialConnection(con)
+  if(0 < nchar(newText)){
+    Temps<-as.chron(Sys.time()+3600)
+    TempsRel<-as.numeric(Temps-as.chron(starTime+3600))*60*60*24
+    foo <- paste(foo, newText,";",Temps,";",TempsRel)
+    print(nchar(newText))
+    cat(foo,file=NomFich)
+    if(figure!=c("non")){
+      ErLectTable<-sum(class(try(Tableau<-read.table(file=NomFich,sep=";",dec=".",header=F),TRUE))[1]==c("try-error"))## ICI
+      if (ErLectTable==1){print("problème d'enregistement des données")}
+      
+      if (ErLectTable==0){##ICI
+        Tableau<-read.table(file=NomFich,sep=";",dec=".",header=F)
+        
+        #Donnée Brute numériques
+        AxeX<-as.numeric(Tableau$V34) 
+        Pression<-Tableau[,c("V8")] # analog
+        PressionDiff<-Tableau[,c("V10","V12","V14","V16","V18")] #analog
+        Tempera<-Tableau[,c("V20","V22","V24","V26","V28","V30")] #en ohm
+        
+        #Testage des données
+        DonneeNum<-cbind(AxeX,Pression,PressionDiff,Tempera)
+        SelectNum<-sapply(DonneeNum,class)==c("numeric")
+        
+
+        if(mean(SelectNum)!=1){print(c("problème avec une des sondes"))
+        }else if(mean(SelectNum)==1){
+            
+            #Calcul des valeurs 
+            PressionDiffPa<-(-((PressionDiff-34.816706)/0.847368/100*9806.6))
+            TemperaCel<-(1/(1.129336*(10^-3)+2.341350*(10^-4)*log(Tempera)+8.758753*(10^-8)*(log(Tempera)^3))-273.15) # en deg Celsius
+          
+            #Pression
+            P<-cbind(101300,101300+PressionDiffPa)
+            print(plot(AxeX,P[,1],type=c("l"),pch="O",main=c("Pression") , ylim=c(min(P)/1.01,max(P)*1.01),col=Couleur[1],ylab=c("Pression (Pa)"),cex.lab=1.5))
+            print(lines(AxeX,P[,2],type=c("l"),col=Couleur[2]))
+            print(lines(AxeX,P[,3],type=c("l"),col=Couleur[3]))
+            print(lines(AxeX,P[,4],type=c("l"),col=Couleur[4]))
+            print(lines(AxeX,P[,5],type=c("l"),col=Couleur[5]))
+            print(lines(AxeX,P[,6],type=c("l"),col=Couleur[6]))
+            print(legend(x=min(AxeX)*2,y=max(P)*1.02,legend=c("Ambiant","Temoin","1","2","3","4"),fill=Couleur,cex=TailLeg))
+    
+            #Temperature
+            T<- TemperaCel
+            print(plot(AxeX,T[,1],type=c("l"),pch="O",main=c("Temperature") , ylim=c(10,25),col=Couleur[1],ylab=c("Temperature (°C)"),cex.lab=1.5))
+            print(lines(AxeX,T[,2],type=c("l"),col=Couleur[2]))
+            print(lines(AxeX,T[,3],type=c("l"),col=Couleur[3]))
+            print(lines(AxeX,T[,4],type=c("l"),col=Couleur[4]))
+            print(lines(AxeX,T[,5],type=c("l"),col=Couleur[5]))
+            print(lines(AxeX,T[,6],type=c("l"),col=Couleur[6]))
+            }
+          }
+        }    
+    }
+}
+
+close(con)
+
+write.table(x=Table,file=paste(num,c("_E_Final.txt"),sep=c("")),sep=c(";"),row.names =F )
+
