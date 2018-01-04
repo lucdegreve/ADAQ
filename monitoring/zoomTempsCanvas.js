@@ -70,7 +70,6 @@ function drawTempsCanvas(csvfile, title){
     
         data.forEach(function(d) {
     		d.Datetime = parseDate(d.Datetime);
-                    // console.log(d);
         });
     
         // Scale the range of the data
@@ -83,8 +82,6 @@ function drawTempsCanvas(csvfile, title){
         var dataByProbe = d3.nest()
           .key(function(d) { return d.probe; })
           .entries(data);
-    
-        console.log(dataByProbe);
     
         var focuslineGroups = focus.selectAll("g")
             .data(dataByProbe)
@@ -134,7 +131,6 @@ function drawTempsCanvas(csvfile, title){
         for (key in dataByProbe){
             var legx = width+margin.left+10;
             var legy = key * (legendRectSize+legendSpacing);
-            console.log(legx);
             svg.append('rect')
               .attr("x", legx)
               .attr("y", legy)                                     
@@ -176,8 +172,6 @@ function drawTempsCanvas(csvfile, title){
     function brushed() {
     
       var s = d3.event.selection; // || x2.range();
-      console.log("d3 event selection");
-      console.log(d3.event.selection);
       x.domain(s.map(x2.invert, x2));
 
       focus.selectAll("path.line").attr("d",  function(d) {return templine(d.values)});
