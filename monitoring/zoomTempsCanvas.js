@@ -25,10 +25,6 @@ function drawTempsCanvas(csvfile, title){
         xAxis2 = d3.axisBottom(x2),
         yAxis = d3.axisLeft(y);
     
-    var brush = d3.brushX()
-        .extent([[0, 0], [width, height2]])
-        .on("end", brushed);
-    
     // Define the line
     var templine = d3.line()	
         .x(function(d) { return x(d.Datetime); })
@@ -60,7 +56,12 @@ function drawTempsCanvas(csvfile, title){
     var context = svg.append("g")
       .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 
-   
+    // brush stuff
+
+    var brush = d3.brushX()
+        .extent([[0, 0], [width, height2]])
+        .on("end", brushed);
+
     // Legend stuff
     var legendRectSize = 18;
     var legendSpacing = 4;
@@ -73,8 +74,13 @@ function drawTempsCanvas(csvfile, title){
         });
     
         // Scale the range of the data
-        x.domain(d3.extent(data, function(d) { return d.Datetime; }));
-        y.domain([-10, 80]);
+
+        first = new d3.extent(data, function(d) { return d.Datetime; })[0]
+        last = new d3.extent(data, function(d) { return d.Datetime; })[1];
+        now = new Date();
+
+        x.domain([first, now]);
+        y.domain([-10, 90]);
    
         x2.domain(x.domain());
         y2.domain(y.domain());
@@ -165,7 +171,13 @@ function drawTempsCanvas(csvfile, title){
             .attr("dy", "1em")
             .style("text-anchor", "middle")
             .text("T°");
-    
+   
+        // initial brush
+
+        oneDayAgo = d3.utcDay.offset(now, -1); 
+        brushSel = context.append('g').call(brush);       
+        brush.move(brushSel, [oneDayAgo, now].map(x));
+
 
         });
 
