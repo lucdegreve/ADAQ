@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta http-equiv="refresh" content="300">
+<style> /* set the CSS */
+
+body { font: 12px Arial;}
+
+path { 
+    stroke: steelblue;
+    stroke-width: 2;
+    fill: none;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: grey;
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+
+.legend {
+    font-size: 16px;
+    font-weight: bold;
+    text-anchor: middle;
+}
+
+.brush .extent {
+  stroke: #fff;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}
+
+.line {
+  fill: none;
+}
+
+.legend rect {
+  fill:white;
+  stroke:black;
+  opacity:0.8;}
+
+</style>
+<body>
+
+<!-- load the d3.js library -->    
+<script src="node_modules/d3/build/d3.min.js"></script>
+<script src="javascript/zoomTempsCanvas.js" type="text/javascript"></script>
+
+<script>
+
+  drawTempsCanvas("../csv/Temps/cell_5.csv", "Cellule 5");
+  drawTempsCanvas("../csv/Temps/cell_6.csv", "Cellule 6");
+  drawTempsCanvas("../csv/Temps/cell_7.csv", "Cellule 7");
+  drawTempsCanvas("../csv/Temps/cell_8.csv", "Cellule 8");
+
+</script>
+</body>
+
