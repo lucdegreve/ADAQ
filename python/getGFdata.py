@@ -9,13 +9,15 @@ browser = RoboBrowser()
 # Access the GreenFeed websiteand fill the login form
 browser.open(base_url)
 form = browser.get_form(action="checklogon.php")
-form["username"] = ''
-form["password"] = ''
+form["username"] = '' # to be completed!
+form["password"] = '' # to be completed!
 browser.session.headers['Referer'] = base_url
 browser.submit_form(form, submit='Login')
 
+# create the request to access the xls file
 request = browser.session.get(base_url_xls, stream=True)
 
+# save the xls file
 with open("test.xls", "wb") as xls_file:
     xls_file.write(request.content)
 
