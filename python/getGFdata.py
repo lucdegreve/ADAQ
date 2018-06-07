@@ -3,11 +3,15 @@
 #   -save a csv file with the interesting data.
 # Authors : Luc Degreve, Alexandre Mertens
 
-from robobrowser import RoboBrowser    # website browsing
-import xlrd                            # Excel file reading
-from xlwt import Workbook              # Excel file writing
+from robobrowser import RoboBrowser     # website browsing
+import xlrd                             # Excel file reading
+from xlwt import Workbook               # Excel file writing
+import pandas as pd                     # Csv file writing
+from datetime import date               # Date
+import os                               # To delete a file
 
 downloadData = True
+modifyData = True
 convertToCsv = True
 
 
@@ -22,8 +26,8 @@ def getGFSummary(outFile):
     # Access the GreenFeed websiteand fill the login form
     browser.open(base_url)
     form = browser.get_form(action="checklogon.php")
-    form["username"] = ''  # to be completed!
-    form["password"] = ''  # to be completed!
+    form["username"] = 'CRAW'  # to be completed!
+    form["password"] = 'greenfeed'  # to be completed!
     browser.session.headers['Referer'] = base_url
     browser.submit_form(form, submit='Login')
 
@@ -36,7 +40,7 @@ def getGFSummary(outFile):
     return()
 
 
-def excelToCsv(xls_file):
+def selectData(xls_file):
 
     # xls file opening and sheet selection
     document = xlrd.open_workbook(xls_file)
@@ -58,10 +62,19 @@ def excelToCsv(xls_file):
 
 
 # get GF summary, transform to csv and save in the csv
-xls_file = "../csv/GreenFeed/GF_Summary.xls"
+
+xls_file = "GF_Summary.xls"
+exitFile = "../csv/GreenFeed/GF_Summary"
+
 if downloadData:
     getGFSummary(xls_file)
 
+if modifyData:
+    xls_file = selectData(xls_file)
+    xls_file.save('GF_Summary.xls')
+	
 if convertToCsv:
-    csv_file = excelToCsv(xls_file)
-    csv_file.save("../csv/GreenFeed/GF_Summary.csv")
+	today = str(date.today())
+	df = pd.read_excel('GF_Summary.xls')
+	df.to_csv(exitFile+'_'+today, index=False)
+os.remove('GF_Summary.xls')
