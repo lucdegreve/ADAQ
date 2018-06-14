@@ -17,6 +17,7 @@ deleteXls = True
 getRealTData = True
 getDateCali = True
 getDateRec = True
+getStatus = True
 colData = True
 
 def GFLogin(login,password):
@@ -107,6 +108,14 @@ def dateRec():
     inddatco2 = str.find(calibrationco2, "<st>")
     return(calibrationco2[inddatco2 + 4:inddatco2 + 14])
 
+def Status():
+    browser.open("https://greenfeed.c-lockinc.com/GreenFeed/ajax/getfeederinfo.php?fid=91")
+
+    feederinfo = str(browser.parsed)
+    indfeedstart = str.find(feederinfo, "<status>")
+    indfeedend = str.find(feederinfo,"</status>")
+    return(feederinfo[indfeedstart+8:indfeedend])
+
 def exelColData():
     # Creation of the new file
     book2 = Workbook()
@@ -119,6 +128,8 @@ def exelColData():
         valCol.append(dateCali())
     if getDateRec:
         valCol.append(dateRec())
+    if getStatus:
+        valCol.append(Status())
     lenVal=len(valCol)
 
     for i in range(0, lenVal):
