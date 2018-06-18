@@ -12,7 +12,7 @@ from datetime import date               # Date
 from datetime import timedelta, datetime
 import os                               # To delete a file
 
-downloadData = True
+downloadData = False
 modifyData = True
 convertToCsv = True
 deleteXls = True
@@ -20,8 +20,10 @@ getRealTData = True
 getDateCali = True
 getDateRec = True
 getStatus = True
-colData = True
+colData = False
 tableau = True
+getUntreatedData = False
+
 def GFLogin(login,password):
     base_url = "https://greenfeed.c-lockinc.com/GreenFeed/home.php"
 
@@ -143,6 +145,10 @@ def Recherche(cont_page, val,lent=None, valend=None):
             listval.append(cont_page[listeind[y]+len(val):listeindend[y]])
     return listval
 
+def permute(liste,k):
+    liste[k],liste[k+1]=liste[k+1],liste[k]
+    return
+
 def getTableau():
     temps = timedelta(days=7)
     temps2 = timedelta(days=30)
@@ -157,10 +163,12 @@ def getTableau():
     tableaubrute = str(browser.parsed)
 
     listtag = Recherche(tableaubrute,'tag="',24)
+    for o in range(len(listtag)):
+        listtag[o]= listtag[o].lstrip('0')
     listnom = Recherche(tableaubrute,'name="',8)
     listdate = Recherche(tableaubrute, "<date>",5)
     listdrop = Recherche(tableaubrute,"<v>",None, '</v>')
-    listdrop= list(zip(*[iter(listdrop)]*len(listdate)))
+    listdrop = list(zip(*[iter(listdrop)]*len(listdate)))
 
 
 
@@ -183,8 +191,17 @@ def getTableau():
     bonval = []
     for y in ind :
         bonval.append(somind[y])
-
-
+#----------------------------------------
+    passage = 0
+    while bonval != sorted(bonval):
+        passage += 1
+        for u in range (len(bonval)-1):
+            if bonval[u]>bonval[u+1]:
+                permute(bonval,u)
+                permute(listtag,u)
+                permute(listnom,u)
+                permute(listdrop,u)
+#----------------------------------------
     # excel
     book3 = Workbook()
     sheet1 = book3.add_sheet("Tableau")
@@ -224,6 +241,19 @@ def exelColData():
 
     return(book2)
 
+def untreatedData():
+    temps3 = timedelta(days=2)
+    arrive = datetime.today()
+    depart3 = arrive - temps3
+    depart3str = str(depart3)
+    request = browser.session.get(
+        'https://greenfeed.c-lockinc.com/GreenFeed/downloaddata/downloaddailyfiles.php?dl=11111&fl=,' + depart3str[
+                                                                                                        0:4] + depart3str[
+                                                                                                               5:7] + depart3str[
+                                                                                                                      8:10] + ', stream=True')
+    with open('untreated_data ' + depart3str[0:10] + '.zip', "wb") as test:
+        test.write(request.content)
+    return()
 #======================================================================================================================#
 
 # get GF summary, transform to csv and save in the csv
@@ -233,6 +263,7 @@ xls_file = "GF_Summary.xls"
 #exitFile = "../csv/GreenFeed/GF_Summary"
 exitFile = "GF_Summary"
 valeur = ("Air Flow", "Temperature", "Humidity")
+
 
 browser = RoboBrowser()
 GFLogin('CRAW','greenfeed')
@@ -269,3 +300,6 @@ if convertToCsv and tableau:
 
 if deleteXls and tableau:
     os.remove('tableau.xls')
+
+if getUntreatedData:
+    untreatedData()
