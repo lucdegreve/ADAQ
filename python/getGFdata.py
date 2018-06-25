@@ -23,13 +23,12 @@ getDateCali = True
 getDateRec = True
 getStatus = True
 
-tableau = True
+tableau =True
 
 convertToCsv = True
 deleteXls = True
 
 getUntreatedData = True
-
 
 def GFLogin(login, password):
     base_url = "https://greenfeed.c-lockinc.com/GreenFeed/home.php"
@@ -75,11 +74,14 @@ def selectData(xls_sum_file):
     return book
 
 
-def excelToCsv(xls_sum_file, name_sum_file):
+def excelToCsv(xls_sum_file, name_sum_file, withdateYorN='N'):
     # convert the excel file to a CSV file
     today = str(date.today())
     df = pd.read_excel(xls_sum_file)
-    df.to_csv(name_sum_file + '_' + today, index=False)
+    if withdateYorN == 'Y':
+        df.to_csv(name_sum_file + '_' + today, index=False)
+    else :
+        df.to_csv(name_sum_file , index=False)
 
 
 def colTimeData(valeur):
@@ -250,19 +252,31 @@ def exelColData():
     book2 = Workbook()
     sheet1 = book2.add_sheet('Col_Data')
     valCol = []
+    nomCol = []
+    today = str(date.today())
+
+
     if getRealTData:
         for k in (colTimeData(valeur)):
             valCol.append(k)
+        for l in valeur:
+            nomCol.append(l)
     if getDateCali:
         valCol.append(dateCali())
+        nomCol.append("Dernière calibration")
     if getDateRec:
         valCol.append(dateRec())
+        nomCol.append("Dernière recovery")
+    nomCol.append('Date')
+    valCol.append(today)
     if getStatus:
         valCol.append(Status())
+        nomCol.append("Statut")
     lenVal = len(valCol)
 
     for i in range(0, lenVal):
-        sheet1.write(i, 0, valCol[i])
+        sheet1.write(i, 0, nomCol[i])
+        sheet1.write(i, 1, valCol[i])
 
     return book2
 
@@ -315,7 +329,7 @@ if modifySum and GFSummary:
 
 if convertToCsv and GFSummary:
     try:
-        excelToCsv("GF_Summary.xls", name_sum_file)
+        excelToCsv("GF_Summary.xls", name_sum_file,'Y')
     except:
         print("Erreur : la convertion du résumé en CSV est impossible !")
 
@@ -334,7 +348,7 @@ if colData:
 
 if convertToCsv and colData:
     try:
-        excelToCsv("Col_Data.xls", "colData")
+        excelToCsv("Col_Data.xls", "colData",'N')
     except:
         print("Erreur : la convertion des données d'état du greenfeed en CSV est impossible !")
 
@@ -353,7 +367,7 @@ if tableau:
 
 if convertToCsv and tableau:
     try:
-        excelToCsv("tableau.xls", "Tableau")
+        excelToCsv("tableau.xls", "Tableau", 'N')
     except:
         print("Erreur : la convertion du tableau des animaux en CSV est impossible !")
 
