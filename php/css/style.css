@@ -62,6 +62,30 @@ margin-top: 10;
 .voir {
   background-color: red;
 }
+.table td, .table th body{
+	padding: .20rem;
+	vertical-align: top;
+  text-align: center;
+	border-top: 1px solid #dee2e6;
+}
+.table th, .table td body{
+	padding: 4px;
+	line-height: 20px;
+	text-align: center;
+	vertical-align: top;
+	border-top: : 1px solid #dddddd;
+  background-color: #bbb;
+}
+.table-striped tbody tr:nth-of-type(2n) {
+	background-color: #bbb;
+}
+.table thead {
+  background-color: #456687;
+  color: lightgray;
+}
+.table {
+  border-bottom: 2px solid #456687;
+}
 #============================== onglets ======================================
 
 * {
