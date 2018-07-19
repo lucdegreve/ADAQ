@@ -287,12 +287,12 @@ def exelColData(GF):
     else:
         couCol.append("black")
 
-    if float(valCol[1][0:len(valCol[0])-3])<-30 or float(valCol[1][0:len(valCol[0])-3])>50:
+    if float(valCol[1][0:len(valCol[1])-3])<-30 or float(valCol[1][0:len(valCol[0])-3])>50:
         couCol.append("red")
     else:
         couCol.append("black")
 
-    if float(valCol[2][0:len(valCol[0])-4])<30:
+    if float(valCol[2][0:len(valCol[2])-4])<30:
         couCol.append("red")
     else:
         couCol.append("black")

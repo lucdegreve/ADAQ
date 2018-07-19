@@ -1,3 +1,4 @@
+@ECHO off 
 cd C:\phpresource
 start php -S localhost:80
 
@@ -17,6 +18,7 @@ set cheminnav=C:\Users\l.degreve\AppData\Local\Mozilla Firefox\firefox.exe
 
 :loop
 set /a heure = (24-%compteur%)
+@ECHO on
 echo Il reste %heure%h avant la sauvgarde des donnees
 @ECHO off 
 if %compteur% == 24 (
